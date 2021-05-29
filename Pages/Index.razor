@@ -1,0 +1,80 @@
+﻿@page "/"
+@using PruebaSnake.Data;
+
+<table runat="server">
+
+    @for (int j = 0; j < tabY; j++)
+    {
+        <tr id="@j">
+            @for (int i = 0; i < tabX; i++)
+            {
+                Pixel pixel = new Pixel(i, j);
+
+                // hay una serpiente sin mas
+                if (MySnake.Check(pixel))
+                {
+                    <td id="@i">[S]</td>
+                }
+
+                // la manzana y la cabeza de la serpiente coinciden
+                else if (MySnake.Body[0].posX == AppleX && MySnake.Body[0].posY == AppleY)
+                {
+                    CreateApple();
+                    MySnake.Grow();
+                }
+
+                // hay una manzana sin mas
+                else if (AppleX == i && AppleY == j)
+                {
+                    <td id="@i">[M]</td>
+                }
+
+                // la cabeza de la serpiente coincide con los limites del tablero
+                else if (MySnake.Body[0].posX < 0 || MySnake.Body[0].posX >= tabX || MySnake.Body[0].posY < 0 || MySnake.Body[0].posY >= tabY)
+                {
+                    TimerStop();
+                }
+
+                /*
+                else if (MySnake.Collision())
+                {
+                    TimerStop();
+                }
+                */
+
+                // hay otra cosa
+                else
+                {
+                    <td id="@i">[_]</td>
+                }
+
+            }
+        </tr>
+    }
+</table>
+
+<input id="controls" class="txtControl mb-2" type="text" placeholder="Controla con las flechas" @onkeydown="KeyboardEventHandler"/>
+<button class="btn btn-primary" @onclick="TimerStart">Jugar</button>
+
+@code {
+    private void KeyboardEventHandler(KeyboardEventArgs args)
+    {
+        if(args.Key == "ArrowLeft" && direction != Snake.RIGHT)
+        {
+            direction = Snake.LEFT;
+        }
+        else if (args.Key == "ArrowUp" && direction != Snake.DOWN)
+        {
+            direction = Snake.UP;
+        }
+        else if (args.Key == "ArrowRight" && direction != Snake.LEFT)
+        {
+            direction = Snake.RIGHT;
+        }
+        else if (args.Key == "ArrowDown" && direction != Snake.UP)
+        {
+            direction = Snake.DOWN;
+        }
+        lastDirection = direction;
+    }
+}
