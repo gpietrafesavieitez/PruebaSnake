@@ -6,29 +6,30 @@ namespace PruebaSnake.Pages
 {
     public partial class Index : IDisposable
     {
-        public int tabX, tabY;
-        public Snake MySnake;
-        public int AppleX { get; set; }
-        public int AppleY { get; set; }
+        private Board MyBoard;
+        private Snake MySnake;
+        private Apple MyApple;
         private Timer MyTimer;
-        private int direction = Snake.RIGHT;
-        private int lastDirection = Snake.RIGHT;
-        public Random RandNum = new Random();
+        private Random RandNum;
+        Direction Dir;
+
         protected override void OnInitialized()
         {
-            tabX = 25;
-            tabY = 25;
+            MyBoard = new(20, 20);
+            MySnake = new(0, 0);
+            MyApple = new(0, 0);
+            RandNum = new();
             MyTimer = new();
             MyTimer.Interval = 100;
             MyTimer.Elapsed += TimerEvent;
-            MySnake = new();
+            Dir = Direction.RIGHT;
             CreateApple();
         }
 
         private void CreateApple()
         {
-            AppleX = RandNum.Next(0, tabX);
-            AppleY = RandNum.Next(0, tabY);
+            MyApple.PosX = RandNum.Next(0, MyBoard.TabX);
+            MyApple.PosY = RandNum.Next(0, MyBoard.TabY);
         }
 
         private void TimerStart()
@@ -43,7 +44,7 @@ namespace PruebaSnake.Pages
 
         private void TimerEvent(object senter, ElapsedEventArgs e)
         {
-            MySnake.Move(direction);
+            MySnake.Move(Dir);
             InvokeAsync(StateHasChanged);
         }
 
