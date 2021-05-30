@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace PruebaSnake.Data
+﻿namespace PruebaSnake.Data
 {
-    public class Apple
+    public class Apple : Pixel
     {
+        public Apple(int posX, int posY) : base(posX, posY)
+        {
+            PosX = posX;
+            PosY = posY;
+        }
     }
 }
