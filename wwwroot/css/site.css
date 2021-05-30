@@ -48,36 +48,3 @@ a, .btn-link {
         right: 0.75rem;
         top: 0.5rem;
     }
-
-
-
-.snake {
-    background-color: forestgreen;
-    height: 2rem;
-    width: 2rem;
-}
-
-.board {
-    background-color: lightgrey;
-    height: 2rem;
-    width: 2rem;
-}
-
-.apple {
-    background-color: orangered;
-    height: 2rem;
-    width: 2rem;
-}
-
-.game {
-    border: 5px solid black;
-    width: auto;
-}
-
-.txtControl {
-    width: 27%;
-}
-
-.btnPlay {
-    width: 27%;
-}
