@@ -1,64 +1,90 @@
 ﻿@page "/"
 @using PruebaSnake.Data;
+@inject IJSRuntime JS
 
-<table runat="server">
-    @for (int j = 0; j < MyBoard.TabY; j++)
+<div class="container" tabindex="0" @ref="myDiv" @onkeydown="KeyboardEventHandler">
+    <div class="row">
+        <div class="col-xl-6">
+            <table class="game" runat="server">
+                @for (int j = 0; j < MyBoard.TabY; j++)
+                {
+                    <tr id="@j">
+                        @for (int i = 0; i < MyBoard.TabX; i++)
+                        {
+                            // Hay una serpiente
+                            if (MySnake.Check(new Pixel(i, j)))
+                            {
+                                <td class="snake" id="@i"></td>
+                            }
+                            // La manzana y la cabeza de la serpiente chocan
+                            else if (MySnake.Head.PosX == MyApple.PosX && MySnake.Head.PosY == MyApple.PosY)
+                            {
+                                Score++;
+                                CreateApple();
+                                MySnake.Grow();
+                            }
+                            // Hay una manzana
+                            else if (MyApple.PosX == i && MyApple.PosY == j)
+                            {
+                                <td class="apple" id="@i"></td>
+                            }
+                            // La cabeza de la serpiente choca con el tablero
+                            else if (MySnake.Head.PosX < 0 || MySnake.Head.PosX >= MyBoard.TabX || MySnake.Head.PosY < 0 || MySnake.Head.PosY >= MyBoard.TabY)
+                            {
+                                GameOver = true;
+                            }
+                            // La cabeza de la serpiente choca con una parte de su cuerpo
+                            else if (MySnake.IsCrashing)
+                            {
+                                GameOver = true;
+                            }
+                            // Hay otra cosa
+                            else
+                            {
+                                <td class="board" id="@i"></td>
+                            }
+                        }
+                    </tr>
+                }
+            </table>
+        </div>
+        <div class="col-xl-6"
+            <br />
+            <h3>Dificultad: @Difficulty</h3>
+            <h3>Puntuación: @Counter</h3>
+            <h3>Frutas: @Score</h3>
+            <br /><br />
+            <button class="btn btn-primary" @onclick="TimerStart">Jugar</button>
+            <br /><br />
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1" checked @onchange="@(()=>UpdateDifficulty(Mode.EASY))">
+                <label class="form-check-label" for="inlineRadio1">Fácil</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2" @onchange="@(()=>UpdateDifficulty(Mode.NORMAL))">
+                <label class="form-check-label" for="inlineRadio2">Normal</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="option3" @onchange="@(()=>UpdateDifficulty(Mode.HARD))">
+                <label class="form-check-label" for="inlineRadio3">Difícil</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="option3" @onchange="@(()=>UpdateDifficulty(Mode.EXTREME))">
+                <label class="form-check-label" for="inlineRadio3">Extremo</label>
+            </div>
+        </div>
+    </div>
+    @if (GameOver)
     {
-        <tr id="@j">
-            @for (int i = 0; i < MyBoard.TabX; i++)
-            {
-                // Hay una serpiente
-                if (MySnake.Check(new Pixel(i, j)))
-                {
-                    <td id="@i">[S]</td>
-                }
-
-                // La manzana y la cabeza de la serpiente chocan
-                else if (MySnake.Head.PosX == MyApple.PosX && MySnake.Head.PosY == MyApple.PosY)
-                {
-                    CreateApple();
-                    MySnake.Grow();
-                }
-
-                // Hay una manzana
-                else if (MyApple.PosX == i && MyApple.PosY == j)
-                {
-                    <td id="@i">[A]</td>
-                }
-
-                // La cabeza de la serpiente choca con el tablero
-                else if (
-                        MySnake.Head.PosX < 0
-                    ||  MySnake.Head.PosX >= MyBoard.TabX
-                    ||  MySnake.Head.PosY < 0
-                    ||  MySnake.Head.PosY >= MyBoard.TabY
-                    )
-                {
-                    TimerStop();
-                }
-
-                // La cabeza de la serpiente choca con una parte de su cuerpo
-                else if (MySnake.IsCrashing)
-                {
-                    TimerStop();
-                }
-
-                // Hay otra cosa
-                else
-                {
-                    <td id="@i">[_]</td>
-                }
-            }
-        </tr>
+        TimerStop();
+        StateHasChanged();
     }
-</table>
-<input id="controls" class="txtControl mb-2" type="text" placeholder="Controla con las flechas" @onkeydown="KeyboardEventHandler"/>
-<button class="btn btn-primary" @onclick="TimerStart">Jugar</button>
+</div>
 
 @code {
     private void KeyboardEventHandler(KeyboardEventArgs args)
     {
-        if(args.Key == "ArrowLeft" && Dir != Direction.RIGHT)
+        if (args.Key == "ArrowLeft" && Dir != Direction.RIGHT)
         {
             Dir = Direction.LEFT;
         }
@@ -73,6 +99,21 @@
         else if (args.Key == "ArrowDown" && Dir != Direction.UP)
         {
             Dir = Direction.DOWN;
+        }
+    }
+
+    private async Task FocusOnControls()
+    {
+        await JS.InvokeVoidAsync("setFocusOnInput");
+    }
+
+    protected ElementReference myDiv;
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("SetFocusToElement", myDiv);
         }
     }
 }

@@ -5,6 +5,10 @@
         public int PosX { get; set; }
         public int PosY { get; set; }
 
+        public Pixel()
+        {
+        }
+
         public Pixel(int posX, int posY)
         {
             PosX = posX;
